@@ -2,8 +2,18 @@ exports.config =
   # See http://brunch.io/#documentation for docs.
   files:
     javascripts:
-      joinTo: 'app.js'
+      joinTo:
+        'js/app.js': /^app/
+        'js/vendor.js': /^vendor||^bower_components/  
     stylesheets:
-      joinTo: 'app.css'
+      defaultExtension: 'styl'
+      joinTo:
+        'css/app.css': /^app\/styles/
     templates:
-      joinTo: 'app.js'
+      joinTo: 'templates.js'
+  plugins:
+    babel:
+        ignore: [
+            /^(bower_components|vendor|node_modules)/
+            'app/legacyES5Code/**/*'
+        ]

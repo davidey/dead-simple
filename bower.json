@@ -2,6 +2,9 @@
   "name": "your-app",
   "version": "0.0.1",
   "main": "public/app.js",
-  "dependencies": {},
+  "dependencies": {
+    "jquery": "~2.1.4",
+    "velocity": "~1.2.2"
+  },
   "overrides": {}
 }
