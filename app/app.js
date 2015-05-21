@@ -1,3 +1,26 @@
+function objectEntries(obj) {
+    let index = 0;
+
+    // In ES6, you can use strings or symbols as property keys,
+    // Reflect.ownKeys() retrieves both
+    let propKeys = Object.keys(obj);
+
+    return {
+        [Symbol.iterator]() {
+            return this;
+        },
+        next() {
+            if (index < propKeys.length) {
+                let key = propKeys[index];
+                index++;
+                return { value: [key, obj[key]] };
+            } else {
+                return { done: true };
+            }
+        }
+    };
+}
+
 // function overlayAnimation() {
 // 	$('.overlay').velocity({
 // 		width: 500
@@ -15,21 +38,21 @@
 // };
 
 
-// var animationProperties = {
-// 	el: '.overlay',
-// 	keyframes: {
-// 		0: {},
-// 		500: {
-// 			height: 'start'
-// 		},
-// 		1000: {
-// 			width: 500
-// 		},
-// 		1500: {
-// 			height: 500
-// 		}
-// 	}
-// }
+var animationProperties = {
+	el: '.overlay',
+	keyframes: {
+		0: {},
+		500: {
+			height: 'start'
+		},
+		1000: {
+			width: 500
+		},
+		1500: {
+			height: 500
+		}
+	}
+}
 
 // var animationProperties = {
 // 	el: '.overlay',
@@ -42,56 +65,81 @@
 // 	}
 // }
 
-var animationProperties = {
-	el: '.overlay',
-	keyframes: {
-		0: {},
-		500: {
-			width: 500,
-			height: 'start'
-		},
-		1000: {
-			height: 500			
-		}
-	}
-}
+// var animationProperties = {
+// 	el: '.overlay',
+// 	keyframes: {
+// 		0: {},
+// 		500: {
+// 			width: 500,
+// 			height: 'start'
+// 		},
+// 		1000: {
+// 			height: 500			
+// 		}
+// 	}
+// }
 
 class Parser {
 	constructor(props) {
-		console.log('Object Parser instanciated');
+		this.timeline = {};
+		this.delayedProps = {};
 
 		var $el = $(props.el);
 
-		for (var keyframe of Object.keys(props.keyframes)) {
-			var keyframeProperties = props.keyframes[keyframe];
+		for (let [kf, kfProps] of objectEntries(props.keyframes)) {
+			kf = parseInt(kf);
 
-			if (Object.keys(keyframeProperties).length) {
-				var velocityProperties = this.parseKeyframeProperties(keyframeProperties);
-				var velocityOptions = {
-					delay: 0,
-					duration: keyframe,
-					queue: false
-				};
+			for (let [name, value] of objectEntries(kfProps)) {
+				if (value === 'start') {
+					this.delayedProps[name] = kf;
+				} else {
+					let delay = this.getPropertyDelay(name);
+					let duration = kf - delay;
 
-				$el.velocity(velocityProperties, velocityOptions);
+					this.addTimeoutEntry(name, value, duration, delay);
+				}
 			}
 		}
+
+		this.render($el);
 	}
 
-	parseKeyframeProperties(props, keyframe) {
-		var result = {};
+	addTimeoutEntry(name, value, duration, delay) {
+		let timelineKey = delay + ',' + duration;
 
-		for (var property of Object.keys(props)) {
-			var value = props[property];
+		if (!this.timeline[timelineKey]) {
+			this.timeline[timelineKey] = {
+				delay: delay,
+				duration: duration,
+				properties: {}
+			};
+		}
 
-			if (value === 'start') {
-				continue;
-			}
+		this.timeline[timelineKey].properties[name] = value;
+	}
 
-			result[property] = value;
+	getPropertyDelay(name) {
+		var result = 0;
+
+		if (this.delayedProps[name]) {
+			result = this.delayedProps[name];
+			delete this.delayedProps[name];
 		}
 
 		return result;
+	}
+
+	render($el) {
+		for (let[key, value] of objectEntries(this.timeline)) {
+			var velocityProperties = value.properties;
+			var velocityOptions = {
+				delay: value.delay,
+				duration: value.duration,
+				queue: false
+			}
+
+			$el.velocity(velocityProperties, velocityOptions);
+		}
 	}
 }
 
