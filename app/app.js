@@ -38,21 +38,21 @@ function objectEntries(obj) {
 // };
 
 
-var animationProperties = {
-	el: '.overlay',
-	keyframes: {
-		0: {},
-		500: {
-			height: 'start'
-		},
-		1000: {
-			width: 500
-		},
-		1500: {
-			height: 500
-		}
-	}
-}
+// var animationProperties = {
+// 	el: '.overlay',
+// 	keyframes: {
+// 		0: {},
+// 		500: {
+// 			height: 'start'
+// 		},
+// 		1000: {
+// 			width: 500
+// 		},
+// 		1500: {
+// 			height: 500
+// 		}
+// 	}
+// }
 
 // var animationProperties = {
 // 	el: '.overlay',
@@ -78,6 +78,18 @@ var animationProperties = {
 // 		}
 // 	}
 // }
+
+
+var animationProperties = {
+	el: '.overlay',
+	keyframes: {
+		0: {},
+		1000: {
+			opacity: 0,
+			display: 'none'			
+		}
+	}
+}
 
 class Parser {
 	constructor(props) {
@@ -136,6 +148,16 @@ class Parser {
 				delay: value.delay,
 				duration: value.duration,
 				queue: false
+			}
+
+			if (velocityProperties.display) {
+				velocityOptions.complete = (function (displayValue) {
+					return function () {
+						$el.css('display', displayValue);
+					}
+				}(velocityProperties.display));
+				
+				delete velocityProperties.display;
 			}
 
 			$el.velocity(velocityProperties, velocityOptions);
