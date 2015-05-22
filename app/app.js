@@ -25,7 +25,10 @@ function objectEntries(obj) {
 // 	$('.overlay').velocity({
 // 		width: 500
 // 	}, {
-// 		duration: 1000
+// 		duration: 0,
+// 		complete: function () {
+// 			console.log('complete');
+// 		}
 // 	});
 
 // 	$('.overlay').velocity({
@@ -80,13 +83,25 @@ function objectEntries(obj) {
 // }
 
 
+// var animationProperties = {
+// 	el: '.overlay',
+// 	keyframes: {
+// 		0: {},
+// 		1000: {
+// 			opacity: 0,
+// 			display: 'none'			
+// 		}
+// 	}
+// }
+
 var animationProperties = {
 	el: '.overlay',
 	keyframes: {
-		0: {},
+		200: {
+			display: 'block'
+		},
 		1000: {
-			opacity: 0,
-			display: 'none'			
+			opacity: 1,		
 		}
 	}
 }
@@ -144,6 +159,8 @@ class Parser {
 	render($el) {
 		for (let[key, value] of objectEntries(this.timeline)) {
 			var velocityProperties = value.properties;
+			velocityProperties.tween = 100;
+
 			var velocityOptions = {
 				delay: value.delay,
 				duration: value.duration,
@@ -156,7 +173,7 @@ class Parser {
 						$el.css('display', displayValue);
 					}
 				}(velocityProperties.display));
-				
+
 				delete velocityProperties.display;
 			}
 
@@ -168,5 +185,12 @@ class Parser {
 
 
 $(document).ready(function () {
+	$('.overlay').css({
+		display: 'none',
+		opacity: 0
+	});
+
 	var parser = new Parser(animationProperties);
+
+	// overlayAnimation();
 });
